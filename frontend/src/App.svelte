@@ -1,38 +1,71 @@
 <script lang="ts">
-  import logo from './assets/images/logo-universal.png'
-  import {Greet, PS, Test} from '../wailsjs/go/main/App.js'
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
+  import { GetIdleTime, Test } from '../wailsjs/go/main/App.js';
+  import { seconds } from './lib/stores/seconds';
 
-  let resultText: string = "Please enter your name below 👇"
-  let name: string
+  let idleTime = 0
+  let formattedTime = "00:00:00"
+  let interval: NodeJS.Timer = null;
 
-  function greet(): void {
-    Greet(name).then(result => resultText = result)
+  function setFormattedTime(value: number) {
+    let hours = Math.floor(value / 3600);
+    let mins = Math.floor((value - (hours * 3600)) / 60);
+    let secs = value % 60;
+
+    formattedTime = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 
-  function ps(): void {
-    PS().then(() => {
-      console.log("PS() called");
-    })
+  const unsubscribeSeconds = seconds.subscribe(setFormattedTime)
+
+
+  function start() {
+    if (interval) return
+
+    interval = setInterval(seconds.increment, 500);
+  }
+
+  function stop() {
+    clearInterval(interval);
+    interval = null;
+  }
+
+  function reset() {
+    stop();
+    seconds.reset();
+    formattedTime = "00:00:00";
   }
 
   onMount(() => {
     setInterval(() => {
-      Test().then((result) => {
-        console.log(result);
+      Test().then((res) => {
+        res.
+        console.log(res);
       })
     }, 1000)
+
+    setInterval(() => {
+      GetIdleTime().then((result) => {
+        idleTime = result
+      })
+    }, 1000)
+  })
+
+
+  onDestroy(() => {
+    unsubscribeSeconds();
   })
 </script>
 
 <main>
-  <img alt="Wails logo" id="logo" src="{logo}">
-  <div class="result" id="result">{resultText}</div>
-  <div class="input-box" id="input">
+  <!-- <img alt="Wails logo" id="logo" src="{logo}"> -->
+  <div>idle time : {idleTime}</div>
+  <div>{formattedTime}</div>
+  <button on:click={start}>start</button>
+  <button on:click={stop}>stop</button>
+  <!-- <div class="result" id="result">{resultText}</div> -->
+  <!-- <div class="input-box" id="input">
     <input autocomplete="off" bind:value={name} class="input" id="name" type="text"/>
-    <button class="btn" on:click={greet}>Greet</button>
-    <button class="btn" on:click={ps}>ps</button>
-  </div>
+  </div> -->
 </main>
 
 <style>

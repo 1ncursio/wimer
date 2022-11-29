@@ -3,6 +3,7 @@ module changeme
 go 1.18
 
 require (
+	github.com/lextoumbourou/idle v0.0.0-20211129071637-69c91a94f74b
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/wailsapp/wails/v2 v2.2.0
 )

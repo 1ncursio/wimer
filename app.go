@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"syscall"
 	"unsafe"
 
+	"github.com/lextoumbourou/idle"
 	"github.com/mitchellh/go-ps"
 )
 
@@ -98,4 +100,14 @@ func GetClassName(hwnd HWND) string {
 	)
 
 	return syscall.UTF16ToString(buf)
+}
+
+func (a *App) GetIdleTime() int {
+	idleTime, err := idle.Get()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return int(idleTime.Seconds())
 }
